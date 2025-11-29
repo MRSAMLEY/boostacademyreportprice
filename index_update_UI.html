@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boost Academy Customer Report</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import for a modern look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+
+<body class="bg-gray-50 antialiased">
+
+    <!-- Main Container and Card -->
+    <div class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+        <div class="w-full max-w-xl bg-white shadow-2xl rounded-2xl p-6 sm:p-10 transition-all duration-300">
+
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">Boost Academy Report</h1>
+                <p class="text-gray-500">Customer order and payment submission portal.</p>
+            </header>
+
+            <form id="report-form" onsubmit="event.preventDefault(); sendReport();">
+                <!-- Input Fields -->
+                <div class="space-y-4">
+                    <input type="text" id="name" placeholder="Customer Name" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 transition duration-150">
+                    <input type="tel" id="number" placeholder="Customer Phone Number" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 transition duration-150">
+                    <input type="text" id="address" placeholder="Delivery Address" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 transition duration-150">
+                    <input type="text" id="delivery" placeholder="Delivery Express Service" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 transition duration-150">
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 font-bold">$</span>
+                        <input type="number" id="price" placeholder="Price (e.g., 50.00)" step="0.01" required
+                               class="w-full p-3 pl-8 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 transition duration-150">
+                    </div>
+                </div>
+
+                <!-- Bank Selection Buttons -->
+                <h2 class="text-lg font-semibold text-gray-700 mt-6 mb-3">Select Payment Method</h2>
+                <div id="bank-buttons" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <!-- Buttons will be rendered here by JavaScript -->
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-button"
+                        class="w-full mt-8 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold text-xl py-3 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-800 transition duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transform hover:-translate-y-0.5">
+                    Submit Report
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Custom Message Modal (Replacing alert()) -->
+    <div id="message-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" aria-modal="true" role="dialog">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center transform scale-95 transition-transform duration-300">
+            <div id="modal-icon" class="text-5xl mb-4"></div>
+            <h3 id="modal-title" class="text-xl font-bold mb-2 text-gray-800"></h3>
+            <p id="modal-message" class="text-gray-600 mb-6"></p>
+            <button onclick="hideModal()"
+                    class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-150 w-full">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        // NOTE: The Telegram Bot Token and Chat ID are kept from the original code.
+        const BOT_TOKEN = "8343485371:AAHUzwUW9flKScXHnLvpQO_wPjopAo9nOWc"; 
+        const CHAT_ID = "-1003388800232"; 
+        const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        
+        let selectedBank = null;
+
+        // --- Modal/Message Box Functions ---
+
+        /**
+         * Displays the custom modal with a title, message, and type-specific icon.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The main content message.
+         * @param {'success'|'error'|'info'} type - The type of message.
+         */
+        function showModal(title, message, type = 'info') {
+            const modal = document.getElementById('message-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalIcon = document.getElementById('modal-icon');
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+
+            if (type === 'success') {
+                modalIcon.innerHTML = '🎉';
+            } else if (type === 'error') {
+                modalIcon.innerHTML = '🚨';
+            } else { 
+                modalIcon.innerHTML = 'ℹ️';
+            }
+
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+            modal.querySelector('div').classList.remove('scale-95');
+            modal.querySelector('div').classList.add('scale-100');
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('message-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); 
+        }
+
+        // --- Bank Selection UI and Logic ---
+
+        function setBank(bank) {
+            selectedBank = bank;
+            renderBankButtons();
+            showModal('Payment Selected', `You have chosen ${bank} as the payment method.`, 'info');
+        }
+
+        function renderBankButtons() {
+            const banks = ['ABA Bank', 'ACLEDA Bank', 'WING Bank', 'TRUE Money'];
+            const container = document.getElementById('bank-buttons');
+            container.innerHTML = ''; // Clear existing buttons
+
+            banks.forEach(bank => {
+                const isSelected = selectedBank === bank;
+                const button = document.createElement('button');
+                
+                // Tailwind classes for responsive, premium button design
+                button.className = `
+                    w-full p-3 font-bold text-xs sm:text-sm rounded-xl transition duration-200 ease-in-out shadow-sm
+                    ${isSelected 
+                        ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-500' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                    }
+                `;
+                button.textContent = bank;
+                button.type = 'button'; // Prevent submission when clicking bank buttons
+                button.onclick = () => setBank(bank);
+                container.appendChild(button);
+            });
+        }
+        
+        // Render initial buttons on load
+        document.addEventListener('DOMContentLoaded', renderBankButtons);
+
+        // --- Report Submission Logic ---
+        
+        function getInputValue(id) {
+            return document.getElementById(id).value.trim();
+        }
+
+        async function sendReport() {
+            const name = getInputValue("name");
+            const number = getInputValue("number");
+            const address = getInputValue("address");
+            const delivery = getInputValue("delivery");
+            const price = getInputValue("price");
+
+            if (!selectedBank) {
+                showModal("Missing Selection", "Please select a payment method/bank before submitting.", 'error');
+                return;
+            }
+
+            // Using the 'required' attribute on inputs already handles basic field validation in modern browsers, 
+            // but this is a final check.
+            if (!name || !number || !address || !delivery || !price) {
+                showModal("Missing Fields", "Please ensure all customer details and the price are filled out.", 'error');
+                return;
+            }
+
+            // Construct the Markdown message payload
+            const message =
+`📦 *Boost Academy Report*
+━━━━━━━━━━━━━━
+👤 *Name:* ${name}
+📞 *Number:* ${number}
+🏠 *Address:* ${address}
+🚚 *Delivery:* ${delivery}
+💰 *Price:* $${price}
+🏦 *Payment:* ${selectedBank}
+━━━━━━━━━━━━━━`;
+
+            // Display loading state
+            const submitBtn = document.getElementById('submit-button');
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('from-blue-600', 'to-indigo-700');
+            submitBtn.classList.add('bg-gray-400');
+
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: "Markdown"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                showModal("Success!", "Customer report has been successfully sent to the Telegram channel.", 'success');
+
+                // Clear fields on successful submission
+                document.getElementById("name").value = "";
+                document.getElementById("number").value = "";
+                document.getElementById("address").value = "";
+                document.getElementById("delivery").value = "";
+                document.getElementById("price").value = "";
+                selectedBank = null;
+                renderBankButtons();
+
+            } catch (error) {
+                console.error("Telegram API Error:", error);
+                showModal("Submission Failed", "Could not send the report. Please check your network connection or try again.", 'error');
+            } finally {
+                // Restore button state
+                submitBtn.textContent = 'Submit Report';
+                submitBtn.disabled = false;
+                submitBtn.classList.add('from-blue-600', 'to-indigo-700');
+                submitBtn.classList.remove('bg-gray-400');
+            }
+        }
+    </script>
+
+</body>
+</html>
