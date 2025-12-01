@@ -6,67 +6,56 @@
 <title>Boost Academy Customer Report</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-    /* Import Inter font */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
     body { font-family: 'Inter', sans-serif; }
 
-    /* Custom CSS for the RGB running line effect */
     .rgb-border-wrap {
         position: relative;
-        z-index: 10; /* Ensure content is above the pseudo-element */
-        padding: 1px; /* Padding for the glowing border itself */
-        background: #111827; /* Dark background inside the border */
-        border-radius: 1.5rem; /* Match the rounded-3xl class */
-        overflow: hidden; /* Important to contain the pseudo-element glow */
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Optional: Darker shadow */
+        z-index: 10;
+        padding: 1px;
+        background: #111827;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5),0 4px 6px -2 rgba(0,0,0,0.05);
     }
-
     .rgb-border-wrap::before {
         content: '';
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: conic-gradient(
-            #ff0000, /* Red */
-            #ffff00, /* Yellow */
-            #00ff00, /* Green */
-            #00ffff, /* Cyan */
-            #0000ff, /* Blue */
-            #ff00ff, /* Magenta */
-            #ff0000  /* Red (to complete the loop) */
-        );
-        z-index: -1; /* Place behind the content */
-        animation: rotate 4s linear infinite; /* Adjust speed here */
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: conic-gradient(#ff0000,#ffff00,#00ff00,#00ffff,#0000ff,#ff00ff,#ff0000);
+        z-index: -1;
+        animation: rotate 4s linear infinite;
     }
+    @keyframes rotate { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
 
-    /* Animation definition for the RGB glow */
-    @keyframes rotate {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* Apply a slight border to elements inside the wrap for separation */
     .rgb-inner-content {
-        background-color: #111827; /* Re-apply background color */
-        border-radius: 1.5rem; /* Match parent's rounded-3xl */
-        padding: 2.5rem 1.5rem; /* Re-apply padding equivalent to p-10/p-6 */
+        background-color: #111827;
+        border-radius: 1.5rem;
+        padding: 2.5rem 1.5rem;
     }
 
-    /* Input focus styles for a tech look */
     input:focus, select:focus {
-        border-color: #06b6d4 !important; /* Tailwind cyan-500 */
+        border-color: #06b6d4 !important;
         box-shadow: 0 0 0 2px #06b6d4 !important;
     }
-
-    /* Override input background for dark mode */
     input, select {
-        background-color: #1f2937 !important; /* Tailwind gray-800 */
-        border-color: #374151 !important; /* Tailwind gray-700 */
-        color: #f3f4f6 !important; /* Tailwind gray-100 */
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+        color: #f3f4f6 !important;
     }
-    
+
+    .file-drop-area {
+        border: 2px dashed #06b6d4;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .file-drop-area.dragover {
+        background-color: rgba(6,182,212,0.1);
+    }
 </style>
 </head>
 <body class="bg-gray-900 antialiased text-gray-100 min-h-screen flex items-center justify-center p-4 sm:p-6">
@@ -80,20 +69,20 @@
         </header>
 
         <form id="report-form" onsubmit="event.preventDefault(); sendReport();" class="space-y-6">
-            
+
             <div class="space-y-4">
                 <input type="text" id="name" placeholder="Customer Name" required
-                        class="w-full p-3 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
+                    class="w-full p-3 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
                 <input type="tel" id="number" placeholder="Customer Phone Number" required
-                        class="w-full p-3 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
+                    class="w-full p-3 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
                 <input type="text" id="address" placeholder="Delivery Address" required
-                        class="w-full p-3 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
+                    class="w-full p-3 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
                 <input type="text" id="delivery" placeholder="Delivery Express Service" required
-                        class="w-full p-3 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
+                    class="w-full p-3 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-cyan-500 font-bold">$</span>
                     <input type="number" id="price" placeholder="Price" step="0.01" required
-                            class="w-full p-3 pl-8 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
+                        class="w-full p-3 pl-8 border rounded-lg focus:ring-1 focus:ring-cyan-500 transition duration-150 border-gray-700 bg-gray-800 text-gray-100" />
                 </div>
             </div>
 
@@ -109,6 +98,14 @@
 
             <h2 class="text-lg font-semibold text-cyan-400 mb-3">Authorize Payment Channel</h2>
             <div id="bank-buttons" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6"></div>
+
+            <!-- Drag & Drop Upload -->
+            <label class="block text-cyan-400 font-semibold mb-2 mt-6">Upload Invoice</label>
+            <div id="file-drop-area" class="file-drop-area mb-4">
+                Drag & Drop Invoice Here or Click to Upload
+                <input type="file" id="invoice-file" class="hidden" accept="image/*" />
+            </div>
+            <p id="file-name" class="text-gray-400 text-sm"></p>
 
             <button type="submit" id="submit-button"
                      class="w-full mt-8 bg-gradient-to-r from-cyan-600 to-teal-700 text-white font-bold text-xl py-4 rounded-xl shadow-lg hover:shadow-cyan-500/50 hover:from-cyan-700 hover:to-teal-800 transition duration-300 focus:outline-none focus:ring-4 focus:ring-cyan-500 focus:ring-opacity-50 flex justify-center items-center gap-2 tracking-wider">
@@ -136,8 +133,8 @@ const CHAT_ID = "-1003388800232";
 const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
 let selectedBank = null;
+let selectedFile = null;
 
-// Modal functions
 function showModal(title, message, type='info') {
     const modal = document.getElementById('message-modal');
     const modalTitle = document.getElementById('modal-title');
@@ -146,17 +143,12 @@ function showModal(title, message, type='info') {
 
     modalTitle.textContent = title;
     modalMessage.textContent = message;
-    
-    // Tech-themed icons
+
     let iconHTML = 'ℹ️';
-    if(type === 'success') {
-        iconHTML = '<span class="text-green-400">✅</span>'; // Success checkmark
-    } else if(type === 'error') {
-        iconHTML = '<span class="text-red-500">❌</span>'; // Error cross
-    } else {
-        iconHTML = '<span class="text-cyan-400">🌐</span>'; // Info globe
-    }
-    
+    if(type === 'success') iconHTML = '<span class="text-green-400">✅</span>';
+    else if(type === 'error') iconHTML = '<span class="text-red-500">❌</span>';
+    else iconHTML = '<span class="text-cyan-400">🌐</span>';
+
     modalIcon.innerHTML = iconHTML;
 
     modal.classList.remove('hidden','opacity-0');
@@ -173,17 +165,13 @@ function hideModal() {
     setTimeout(()=>{ modal.classList.add('hidden'); },300);
 }
 
-// Close modal when clicking outside
 document.getElementById('message-modal').addEventListener('click', e => {
     if(e.target.id === 'message-modal') hideModal();
 });
 
-// Bank buttons
 function setBank(bank) {
     selectedBank = bank;
     renderBankButtons();
-    // Use a less intrusive message for selection feedback
-    // showModal('Channel Selected', `Payment will be processed via ${bank} conduit.`, 'info'); 
 }
 
 function renderBankButtons() {
@@ -208,7 +196,39 @@ function renderBankButtons() {
 
 document.addEventListener('DOMContentLoaded', renderBankButtons);
 
-// Form submission
+// File drag & drop
+const dropArea = document.getElementById('file-drop-area');
+const fileInput = document.getElementById('invoice-file');
+const fileNameText = document.getElementById('file-name');
+
+dropArea.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', () => {
+    if(fileInput.files.length) {
+        selectedFile = fileInput.files[0];
+        fileNameText.textContent = selectedFile.name;
+    }
+});
+
+dropArea.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropArea.classList.add('dragover');
+});
+
+dropArea.addEventListener('dragleave', e => {
+    dropArea.classList.remove('dragover');
+});
+
+dropArea.addEventListener('drop', e => {
+    e.preventDefault();
+    dropArea.classList.remove('dragover');
+    if(e.dataTransfer.files.length) {
+        selectedFile = e.dataTransfer.files[0];
+        fileInput.files = e.dataTransfer.files;
+        fileNameText.textContent = selectedFile.name;
+    }
+});
+
 function getInputValue(id) {
     const el = document.getElementById(id);
     return el ? el.value.trim() : '';
@@ -222,19 +242,16 @@ async function sendReport() {
     const price = getInputValue('price');
     const pageName = getInputValue('page-name');
 
-    // Validations
     if(!pageName) { showModal('Error: Missing Data Stream','Select an Origin Data Stream.','error'); return; }
     if(!selectedBank) { showModal('Error: Missing Channel','Authorize a Payment Channel.','error'); return; }
     if(!name || !number || !address || !delivery || !price) { showModal('Error: Incomplete Matrix','All data fields must be populated.','error'); return; }
+    if(!selectedFile) { showModal('Error: Missing Invoice','Upload an invoice image.','error'); return; }
 
-    // Phone validation
     const phonePattern = /^\+?\d{8,15}$/;
     if(!phonePattern.test(number)) { showModal('Error: Invalid Node ID','Enter a valid phone number (Node ID).','error'); return; }
 
-    // Price validation
     if(parseFloat(price) <= 0) { showModal('Error: Invalid Value','Transaction Value must be greater than 0.','error'); return; }
 
-    // Prepare message with tech-inspired formatting
     const message = `
 *--- Boost Academy Report Send ---*
 [STATUS WEB BY: ALSIN]
@@ -246,6 +263,7 @@ async function sendReport() {
 🚚 *Delivery:* ${delivery}
 💰 *Price:* $${price}
 🏦 *Paywith:* ${selectedBank}
+🖼️ *Invoice File:* ${selectedFile.name}
 ⏱️ *Timestamp:* ${new Date().toLocaleString()}
 ━━━━━━━━━━━━━━━━━━━━
 [PROTOCOL: END]
@@ -253,7 +271,6 @@ async function sendReport() {
 
     const submitBtn = document.getElementById('submit-button');
     submitBtn.disabled=true;
-    // Enhanced loading spinner for tech aesthetic
     submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Engaging Protocol...';
 
     try {
@@ -262,17 +279,13 @@ async function sendReport() {
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({chat_id:CHAT_ID,text:message,parse_mode:"Markdown"})
         });
-        
         if(!response.ok) throw new Error(`HTTP error ${response.status}`);
-        
-        // Success message
         showModal('Transmission Successful','Data packet received. Report submitted to Central Matrix.','success');
-
-        // Clear form
         document.getElementById('report-form').reset();
-        selectedBank=null;
+        selectedBank = null;
+        selectedFile = null;
+        fileNameText.textContent = '';
         renderBankButtons();
-
     } catch(err) {
         console.error("Transmission Error:", err);
         showModal('Transmission Failed','Protocol breach detected. Check network connection and credentials.','error');
@@ -284,4 +297,3 @@ async function sendReport() {
 </script>
 </body>
 </html>
-
