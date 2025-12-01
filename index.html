@@ -236,16 +236,16 @@ async function sendReport() {
 
     // Prepare message with tech-inspired formatting
     const message = `
-*--- AetherNet Report Protocol ---*
-[STATUS: TRANSMIT]
+*--- Boost Academy Report Send ---*
+[STATUS WEB BY: ALSIN]
 ━━━━━━━━━━━━━━━━━━━━
-📄 *Source Stream:* ${pageName}
-👤 *Customer Alias:* ${name}
-📞 *Node ID:* ${number}
+📄 *Page:* ${pageName}
+👤 *Customer Name:* ${name}
+📞 *Num ID:* ${number}
 🏠 *Drop Point:* ${address}
-🚚 *Logistics Conduit:* ${delivery}
-💰 *Transaction Value:* $${price}
-🏦 *Payment Channel:* ${selectedBank}
+🚚 *Delivery:* ${delivery}
+💰 *Price:* $${price}
+🏦 *Paywith:* ${selectedBank}
 ⏱️ *Timestamp:* ${new Date().toLocaleString()}
 ━━━━━━━━━━━━━━━━━━━━
 [PROTOCOL: END]
@@ -284,3 +284,4 @@ async function sendReport() {
 </script>
 </body>
 </html>
+
