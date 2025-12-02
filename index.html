@@ -246,14 +246,18 @@ async function sendReport() {
 
     const caption = `
 *--- Boost Academy Report Send ---*
+
 📄 *Page:* ${pageName}
 🆔 *ID:* ${selectedID}
+
 👤 *Customer:* ${name}
 📞 *Phone:* ${number}
 🏠 *Address:* ${address}
 🚚 *Delivery:* ${delivery}
+
 💰 *Price:* $${price}
 🏦 *Pay via:* ${selectedBank}
+
 ⏱️ *Time:* ${new Date().toLocaleString()}
 ━━━━━━━━━━━━━━`;
 
@@ -298,3 +302,4 @@ async function sendReport() {
 
 </body>
 </html>
+
