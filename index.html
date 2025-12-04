@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Boost Academy Dashboard - Multi Image Upload</title>
+<title>Boost Academy Dashboard - Send Album</title>
 
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -327,7 +327,7 @@ function hideModal() {
   document.getElementById("message-modal").style.display = "none";
 }
 
-/* Send Report to Telegram */
+/* Send Report to Telegram as album (media group) */
 async function sendReport() {
   const name = document.getElementById("name").value.trim();
   const number = document.getElementById("number").value.trim();
@@ -344,8 +344,9 @@ async function sendReport() {
 
   const submitBtn = document.getElementById("submit-btn");
   submitBtn.disabled = true;
-  submitBtn.textContent = `Sending ${selectedFiles.length} image(s)... 💌`;
+  submitBtn.textContent = `Sending ${selectedFiles.length} image(s) as album... 💌`;
 
+  // Compose the caption once, used only on the first media
   const caption = `
 *Page:* ${pageName}
 *ID:* ${selectedID}
@@ -364,35 +365,50 @@ Time: ${new Date().toLocaleString()}
   const BOT_TOKEN = "8343485371:AAHUzwUW9flKScXHnLvpQO_wPjopAo9nOWc"; // Replace with your token
   const CHAT_ID = "-1003388800232"; // Replace with your chat ID
 
+  // Prepare media array for sendMediaGroup:
+  // media array with objects:
+  // { type: "photo", media: "attach://file0", caption: "...", parse_mode: "Markdown" } only on first
+  // The rest without caption
+
+  const formData = new FormData();
+  formData.append("chat_id", CHAT_ID);
+
+  const mediaArray = selectedFiles.map((file, index) => {
+    return {
+      type: "photo",
+      media: `attach://file${index}`,
+      ...(index === 0 ? { caption: caption.trim(), parse_mode: "Markdown" } : {})
+    };
+  });
+
+  formData.append("media", JSON.stringify(mediaArray));
+
+  // Append each file as file0, file1, file2...
+  selectedFiles.forEach((file, index) => {
+    formData.append(`file${index}`, file, file.name);
+  });
+
   try {
-    // Send images one by one in sequence
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const formData = new FormData();
-      formData.append("chat_id", CHAT_ID);
-      formData.append("photo", selectedFiles[i]);
-      formData.append("caption", caption);
-      formData.append("parse_mode", "Markdown");
+    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMediaGroup`, {
+      method: "POST",
+      body: formData
+    });
 
-      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-        method: "POST",
-        body: formData,
-      });
+    const result = await response.json();
 
-      const result = await response.json();
-      if (!result.ok) {
-        throw new Error(result.description || "Failed to send photo");
-      }
+    if (result.ok) {
+      showModal("Success", `All ${selectedFiles.length} images sent successfully as an album 💖`);
+      document.getElementById("report-form").reset();
+      selectedBank = null;
+      selectedFiles = [];
+      fileListDisplay.textContent = "";
+      [...bankButtonsContainer.children].forEach(b => b.classList.remove("selected-bank"));
+    } else {
+      throw new Error(result.description || "Unknown error");
     }
 
-    showModal("Success", `All ${selectedFiles.length} images sent successfully 💖`);
-    document.getElementById("report-form").reset();
-    selectedBank = null;
-    selectedFiles = [];
-    fileListDisplay.textContent = "";
-    [...bankButtonsContainer.children].forEach(b => b.classList.remove("selected-bank"));
-
   } catch (error) {
-    showModal("Error", "Failed to send images: " + error.message);
+    showModal("Error", "Failed to send album: " + error.message);
   }
 
   submitBtn.disabled = false;
